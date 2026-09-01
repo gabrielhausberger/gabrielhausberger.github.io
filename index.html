@@ -47,9 +47,8 @@
     </main>
 
     <script>
-        const notes = [
-
-        ];
+        const NOTES_INDEX_URL = 'notes.json';
+        let notes = [];
 
         const pageContent = {
             home: `
@@ -86,13 +85,135 @@
         const contentPanel = document.getElementById('content-panel');
         const navLinks = document.querySelectorAll('.nav-link');
 
+        function escapeHtml(value) {
+            return String(value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function parseMarkdownToHtml(markdown) {
+            const lines = (markdown || '').trim().split(/\n/);
+            let html = '';
+            let inList = false;
+
+            const parseInline = (text) => {
+                let parsed = escapeHtml(text);
+                parsed = parsed.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+                parsed = parsed.replace(/\*(.+?)\*/g, '<em>$1</em>');
+                parsed = parsed.replace(/`([^`]+)`/g, '<code>$1</code>');
+                parsed = parsed.replace(/\[(.+?)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noreferrer">$1</a>');
+                return parsed;
+            };
+
+            lines.forEach((line) => {
+                if (line.startsWith('### ')) {
+                    html += `<h3>${parseInline(line.replace(/^###\s*/, ''))}</h3>`;
+                    inList = false;
+                    return;
+                }
+
+                if (line.startsWith('## ')) {
+                    html += `<h2>${parseInline(line.replace(/^##\s*/, ''))}</h2>`;
+                    inList = false;
+                    return;
+                }
+
+                if (line.startsWith('# ')) {
+                    html += `<h1>${parseInline(line.replace(/^#\s*/, ''))}</h1>`;
+                    inList = false;
+                    return;
+                }
+
+                if (/^-\s+/.test(line)) {
+                    if (!inList) {
+                        html += '<ul>';
+                        inList = true;
+                    }
+                    html += `<li>${parseInline(line.replace(/^-\s*/, ''))}</li>`;
+                    return;
+                }
+
+                if (inList) {
+                    html += '</ul>';
+                    inList = false;
+                }
+
+                if (line.trim() === '') {
+                    return;
+                }
+
+                html += `<p>${parseInline(line)}</p>`;
+            });
+
+            if (inList) html += '</ul>';
+
+            return html;
+        }
+
+        function parseFrontMatter(markdown) {
+            let body = markdown;
+            let date = '';
+            let title = '';
+
+            if (markdown.startsWith('---')) {
+                const endIndex = markdown.indexOf('\n---', 4);
+                if (endIndex !== -1) {
+                    const frontMatter = markdown.slice(4, endIndex);
+                    body = markdown.slice(endIndex + 5).trim();
+
+                    const dateMatch = frontMatter.match(/date\s*:\s*["']?([^\n"']+)["']?/i);
+                    const titleMatch = frontMatter.match(/title\s*:\s*["']?([^\n"']+)["']?/i);
+
+                    if (dateMatch) date = dateMatch[1].trim();
+                    if (titleMatch) title = titleMatch[1].trim();
+                }
+            }
+
+            if (!date) {
+                const dateMatch = markdown.match(/^(\d{4}-\d{2}-\d{2})/);
+                if (dateMatch) date = dateMatch[1];
+            }
+
+            if (!title) {
+                const titleMatch = markdown.match(/^#\s+(.+)$/m);
+                if (titleMatch) title = titleMatch[1].trim();
+            }
+
+            if (!title) {
+                const fallback = markdown.split('\n').find(line => line.trim() && !line.startsWith('---'));
+                title = fallback ? fallback.replace(/^#+\s*/, '').trim() : 'Untitled';
+            }
+
+            return { date, title, body };
+        }
+
+        async function loadNotes() {
+            try {
+                const response = await fetch(NOTES_INDEX_URL, { cache: 'no-store' });
+                if (!response.ok) throw new Error('Unable to load notes list');
+
+                const entries = await response.json();
+                notes = Array.isArray(entries)
+                    ? entries
+                        .filter(entry => entry && entry.date && entry.title && entry.file)
+                        .sort((a, b) => b.date.localeCompare(a.date))
+                    : [];
+            } catch (error) {
+                console.error('Failed to load notes:', error);
+                notes = [];
+            }
+        }
+
         function renderNotesCatalog() {
             return `
                 <div class="page-copy notes-page">
                     <ul class="notes-list">
                         ${notes.map(note => `
                             <li class="notes-item-row">
-                                <button class="note-item" type="button" data-note="${note.title}">
+                                <button class="note-item" type="button" data-note="${encodeURIComponent(note.file)}">
                                     <span class="note-date">[${note.date}]</span>
                                     <span class="note-title">${note.title}</span>
                                 </button>
@@ -103,30 +224,43 @@
             `;
         }
 
-        function renderNotePage(noteTitle) {
-            const note = notes.find(item => item.title === noteTitle);
+        async function renderNotePage(noteFile) {
+            const note = notes.find(item => item.file === decodeURIComponent(noteFile));
             if (!note) return renderNotesCatalog();
 
-            return `
-                <div class="page-copy note-page">
-                    <div class="note-header-row">
-                        <button class="note-back" type="button" data-back="notes">←</button>
-                        <h2>${note.title}</h2>
+            try {
+                const response = await fetch(note.file, { cache: 'no-store' });
+                if (!response.ok) throw new Error('Unable to load note file');
+                const markdown = await response.text();
+                const { title, date, body } = parseFrontMatter(markdown);
+
+                return `
+                    <div class="page-copy note-page">
+                        <div class="note-header-row">
+                            <button class="note-back" type="button" data-back="notes">←</button>
+                            <h2>${title || note.title}</h2>
+                        </div>
+                        <div class="note-meta">[${date || note.date}]</div>
+                        <div class="note-body">${parseMarkdownToHtml(body)}</div>
                     </div>
-                    <div class="note-meta">[${note.date}]</div>
-                    <p class="note-body">${note.body}</p>
-                </div>
-            `;
+                `;
+            } catch (error) {
+                console.error('Failed to load note content:', error);
+                return renderNotesCatalog();
+            }
         }
 
-        function setPage(page, noteTitle) {
+        async function setPage(page, noteFile) {
             if (page === 'notes') {
                 contentPanel.innerHTML = renderNotesCatalog();
                 document.querySelectorAll('.note-item').forEach(button => {
                     button.addEventListener('click', () => setPage('note', button.dataset.note));
                 });
             } else if (page === 'note') {
-                contentPanel.innerHTML = renderNotePage(noteTitle);
+                contentPanel.innerHTML = '<div class="page-copy"><p>Loading…</p></div>';
+                const noteMarkup = await renderNotePage(noteFile);
+                contentPanel.innerHTML = noteMarkup;
+
                 const backButton = document.querySelector('.note-back');
                 if (backButton) {
                     backButton.addEventListener('click', () => setPage('notes'));
@@ -149,7 +283,12 @@
             });
         });
 
-        setPage('home');
+        async function init() {
+            await loadNotes();
+            setPage('home');
+        }
+
+        init();
     </script>
 
 </body>
