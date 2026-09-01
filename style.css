@@ -1,0 +1,270 @@
+* {
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: auto;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    background: #f4f3ef;
+    color: #292929;
+    overflow-y: auto;
+
+    font-family: "Instrument Serif", "Noto Serif CJK SC", "Songti SC", "SimSun", serif;
+    font-size: 16px;
+    line-height: 1.65;
+}
+
+main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 60px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.content-panel {
+    width: 610px;
+    height: 330px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-end;
+    overflow: hidden;
+}
+
+.page-copy {
+    width: 100%;
+    min-height: 330px;
+    max-height: 330px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding-left: 20px;
+    padding-right: 0px;
+    overflow-y: auto;
+    margin-right: 0;
+}
+
+.page-copy h2 {
+    margin: 0 0 18px 0;
+    font-size: 28px;
+    font-weight: normal;
+}
+
+.page-copy p {
+    margin: 0 0 10px 0;
+    font-size: 18px;
+    line-height: 1.5;
+}
+
+
+/* INTRO */
+
+.intro {
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-start;
+    gap: 30px;
+    width: 100%;
+    min-height: 0;
+    height: auto;
+    margin: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.intro-text {
+    padding-top: 0;
+    flex: 0 1 330px;
+    width: 330px;
+    max-width: 330px;
+    margin: 0;
+    min-height: 330px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.profile-photo {
+    width: 610px;
+    height: 330px;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+    margin-left: auto;
+    margin-top: 0;
+    align-self: flex-start;
+    filter: saturate(0.9);
+}
+
+
+/* NAME */
+
+h1 {
+    margin: 0;
+    font-size: 46px;
+    font-weight: normal;
+    letter-spacing: -1px;
+    line-height: 0.98;
+    margin-top: 0;
+}
+
+
+/* NAVIGATION */
+
+nav {
+    margin-top: 18px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    flex: 0 0 auto;
+}
+
+nav a {
+    margin-right: 0;
+    font-size: 18px;
+    line-height: 1.2;
+    color: #444;
+    text-decoration: none;
+}
+
+nav a:hover,
+nav a.active {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+
+
+/* NOTES LIST */
+
+.notes-page {
+    padding-left: 0;
+    padding-top: 0;
+    padding-right: 20px;
+    justify-content: flex-start;
+    overflow-y: auto;
+}
+
+.notes-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+}
+
+.notes-item-row {
+    margin: 0;
+    padding: 0;
+}
+
+.note-item {
+    display: block;
+    width: 100%;
+    margin: 18px 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    text-align: left;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+}
+
+.note-item:hover .note-date,
+.note-item:hover .note-title {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.note-date {
+    color: #666;
+    font-size: 18px;
+}
+
+.note-title {
+    margin-left: 8px;
+    font-size: 19px;
+}
+
+.note-page {
+    padding-left: 0;
+}
+
+.note-header-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+}
+
+.note-back {
+    border: none;
+    background: transparent;
+    color: #444;
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+}
+
+.note-meta {
+    color: #666;
+    margin-bottom: 18px;
+    font-size: 16px;
+}
+
+.note-body {
+    margin: 0;
+    font-size: 18px;
+    line-height: 1.7;
+}
+
+
+/* CONTENT */
+
+section {
+    display: none;
+}
+
+h2 {
+    margin: 0 0 15px 0;
+    font-size: 20px;
+    font-weight: normal;
+}
+
+p {
+    margin: 0 0 20px 0;
+}
+
+
+/* FOOTER */
+
+footer {
+    margin-top: 0;
+    margin-left: 0;
+    align-self: flex-start;
+    padding-left: 0;
+    position: relative;
+    top: 0;
+    margin-bottom: 0;
+}
+
+footer a {
+    margin-right: 22px;
+    display: inline-block;
+    line-height: 1;
+    vertical-align: bottom;
+    color: #777;
+    text-decoration: none;
+}
+
+footer a:hover {
+    color: #222;
+}

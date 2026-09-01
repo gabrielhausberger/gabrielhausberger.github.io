@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Gabriel Hausberger</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Noto+Serif+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <main>
+
+        <div class="intro">
+
+            <div class="intro-text">
+
+                <h1>Gabriel Hausberger</h1>
+
+                <nav>
+                    <a href="#home" class="nav-link active">home</a>
+                    <a href="#about" class="nav-link">about</a>
+                    <a href="#notes" class="nav-link">notes</a>
+                    <a href="#projects" class="nav-link">projects</a>
+                    <a href="#reading" class="nav-link">reading</a>
+                    <a href="#contact" class="nav-link">contact</a>
+                </nav>
+
+                <footer>
+                    <a href="#">github</a>
+                    <a href="#">cv</a>
+                </footer>
+
+            </div>
+
+            <div id="content-panel" class="content-panel" aria-live="polite"></div>
+
+        </div>
+
+    </main>
+
+    <script>
+        const notes = [
+
+        ];
+
+        const pageContent = {
+            home: `
+                <img class="profile-photo" src="images/BackgroundPic.jpg" alt="Gabriel Hausberger">
+            `,
+            about: `
+                <div class="page-copy">
+                    <h2>About</h2>
+                    <p>Applied mathematics student at Duke University and 昆山杜克大学，currently based in China. Interested in mathematics, machine learning, quant finance and China.</p>
+                </div>
+            `,
+            projects: `
+                <div class="page-copy">
+                    <h2>Projects</h2>
+                    <p>Coming soon.</p>
+                </div>
+            `,
+            reading: `
+                <div class="page-copy">
+                    <h2>Reading</h2>
+                    <p>Books and essays on math, statistics, finance, and ideas in China.</p>
+                    <p>Reading notes and recommendations are being collected here.</p>
+                </div>
+            `,
+            contact: `
+                <div class="page-copy contact-page">
+                    <h2>Contact</h2>
+                    <p>gh176@duke.edu</p>
+                    <p>gabriel.hausberger@dukekunshan.edu.cn</p>
+                </div>
+            `
+        };
+
+        const contentPanel = document.getElementById('content-panel');
+        const navLinks = document.querySelectorAll('.nav-link');
+
+        function renderNotesCatalog() {
+            return `
+                <div class="page-copy notes-page">
+                    <ul class="notes-list">
+                        ${notes.map(note => `
+                            <li class="notes-item-row">
+                                <button class="note-item" type="button" data-note="${note.title}">
+                                    <span class="note-date">[${note.date}]</span>
+                                    <span class="note-title">${note.title}</span>
+                                </button>
+                            </li>
+                        `).join('')}
+                    </ul>
+                </div>
+            `;
+        }
+
+        function renderNotePage(noteTitle) {
+            const note = notes.find(item => item.title === noteTitle);
+            if (!note) return renderNotesCatalog();
+
+            return `
+                <div class="page-copy note-page">
+                    <div class="note-header-row">
+                        <button class="note-back" type="button" data-back="notes">←</button>
+                        <h2>${note.title}</h2>
+                    </div>
+                    <div class="note-meta">[${note.date}]</div>
+                    <p class="note-body">${note.body}</p>
+                </div>
+            `;
+        }
+
+        function setPage(page, noteTitle) {
+            if (page === 'notes') {
+                contentPanel.innerHTML = renderNotesCatalog();
+                document.querySelectorAll('.note-item').forEach(button => {
+                    button.addEventListener('click', () => setPage('note', button.dataset.note));
+                });
+            } else if (page === 'note') {
+                contentPanel.innerHTML = renderNotePage(noteTitle);
+                const backButton = document.querySelector('.note-back');
+                if (backButton) {
+                    backButton.addEventListener('click', () => setPage('notes'));
+                }
+            } else {
+                contentPanel.innerHTML = pageContent[page] || pageContent.home;
+            }
+
+            navLinks.forEach(link => {
+                const isActive = link.getAttribute('href') === '#' + (page === 'note' ? 'notes' : page);
+                link.classList.toggle('active', isActive);
+            });
+        }
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', function (event) {
+                event.preventDefault();
+                const page = this.getAttribute('href').replace('#', '');
+                setPage(page === 'notes' ? 'notes' : page);
+            });
+        });
+
+        setPage('home');
+    </script>
+
+</body>
+
+</html>
