@@ -1,0 +1,7 @@
+{
+  "name": "gabrielhausberger.github.io",
+  "private": true,
+  "scripts": {
+    "generate-notes": "node generate-notes.js"
+  }
+}

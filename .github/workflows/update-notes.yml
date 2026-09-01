@@ -1,0 +1,38 @@
+name: Update notes index
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  generate-notes:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Generate notes index
+        run: npm run generate-notes
+
+      - name: Commit generated notes index
+        run: |
+          git add notes.json
+          if git diff --cached --quiet -- notes.json; then
+            echo "notes.json is already up to date."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore: update generated notes index [skip ci]"
+          git push
