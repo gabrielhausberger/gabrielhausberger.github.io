@@ -213,7 +213,7 @@
                     <ul class="notes-list">
                         ${notes.map(note => `
                             <li class="notes-item-row">
-                                <button class="note-item" type="button" data-note="${encodeURIComponent(note.file)}">
+                                <button class="note-item" type="button" data-note-index="${notes.indexOf(note)}">
                                     <span class="note-date">[${note.date}]</span>
                                     <span class="note-title">${note.title}</span>
                                 </button>
@@ -224,12 +224,13 @@
             `;
         }
 
-        async function renderNotePage(noteFile) {
-            const note = notes.find(item => item.file === decodeURIComponent(noteFile));
-            if (!note) return renderNotesCatalog();
+        async function renderNotePage(noteIndex) {
+            const note = notes[Number(noteIndex)];
+            if (!note) return '<div class="page-copy"><p>Note not found.</p></div>';
 
             try {
-                const response = await fetch(note.file, { cache: 'no-store' });
+                const noteUrl = new URL(note.file, document.baseURI);
+                const response = await fetch(noteUrl, { cache: 'no-store' });
                 if (!response.ok) throw new Error('Unable to load note file');
                 const markdown = await response.text();
                 const { title, date, body } = parseFrontMatter(markdown);
@@ -246,7 +247,7 @@
                 `;
             } catch (error) {
                 console.error('Failed to load note content:', error);
-                return renderNotesCatalog();
+                return `<div class="page-copy"><p>Unable to load this note.</p></div>`;
             }
         }
 
@@ -254,7 +255,7 @@
             if (page === 'notes') {
                 contentPanel.innerHTML = renderNotesCatalog();
                 document.querySelectorAll('.note-item').forEach(button => {
-                    button.addEventListener('click', () => setPage('note', button.dataset.note));
+                    button.addEventListener('click', () => setPage('note', button.dataset.noteIndex));
                 });
             } else if (page === 'note') {
                 contentPanel.innerHTML = '<div class="page-copy"><p>Loading…</p></div>';
