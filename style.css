@@ -268,3 +268,124 @@ footer a {
 footer a:hover {
     color: #222;
 }
+
+@media (max-width: 767px) {
+    main {
+        width: 100%;
+        min-height: 100vh;
+        padding: 28px 20px;
+        justify-content: flex-start;
+    }
+
+    .intro {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 24px;
+    }
+
+    .intro-text {
+        width: 100%;
+        max-width: none;
+        min-height: 0;
+        flex-basis: auto;
+        justify-content: flex-start;
+        gap: 14px;
+    }
+
+    h1 {
+        font-size: 38px;
+        line-height: 1.05;
+    }
+
+    nav {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 8px 18px;
+        margin-top: 0;
+    }
+
+    nav a {
+        font-size: 16px;
+    }
+
+    footer {
+        margin-top: 2px;
+    }
+
+    footer a {
+        margin-right: 18px;
+    }
+
+    .content-panel {
+        width: 100%;
+        height: auto;
+        min-height: 0;
+        justify-content: flex-start;
+        overflow: visible;
+    }
+
+    .page-copy {
+        width: 100%;
+        min-height: 0;
+        max-height: none;
+        padding: 0;
+        margin: 0;
+        overflow: visible;
+        overflow-wrap: anywhere;
+    }
+
+    .page-copy h2 {
+        font-size: 24px;
+    }
+
+    .page-copy p,
+    .note-body {
+        font-size: 16px;
+    }
+
+    .profile-photo {
+        width: 100%;
+        max-width: 100%;
+        height: auto;
+        margin: 0;
+    }
+
+    .notes-page {
+        padding: 0;
+    }
+
+    .note-item,
+    .note-title,
+    .note-body {
+        overflow-wrap: anywhere;
+    }
+
+    .note-header-row {
+        min-width: 0;
+        align-items: flex-start;
+    }
+
+    .note-header-row h2 {
+        min-width: 0;
+        overflow-wrap: anywhere;
+    }
+
+    .note-body img {
+        max-width: 100%;
+        height: auto;
+    }
+
+    .note-body pre,
+    .note-body table {
+        display: block;
+        max-width: 100%;
+        overflow-x: auto;
+    }
+
+    .note-body pre,
+    .note-body code,
+    .note-body a {
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+}
