@@ -152,6 +152,14 @@ nav a.active {
     overflow-y: auto;
 }
 
+.books-page {
+    padding-left: 0;
+    padding-top: 0;
+    padding-right: 20px;
+    justify-content: flex-start;
+    overflow-y: auto;
+}
+
 .notes-list {
     list-style: none;
     margin: 0;
@@ -193,7 +201,45 @@ nav a.active {
     font-size: 19px;
 }
 
+.books-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+}
+
+.books-item-row {
+    margin: 0;
+    padding: 0;
+}
+
+.book-item {
+    display: block;
+    width: 100%;
+    margin: 18px 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    text-align: left;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+}
+
+.book-item:hover .book-title {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.book-title {
+    font-size: 19px;
+}
+
 .note-page {
+    padding-left: 0;
+}
+
+.book-page {
     padding-left: 0;
 }
 
@@ -204,7 +250,8 @@ nav a.active {
     margin-bottom: 6px;
 }
 
-.note-back {
+.note-back,
+.book-back {
     border: none;
     background: transparent;
     color: #444;
@@ -354,9 +401,15 @@ footer a:hover {
         padding: 0;
     }
 
+    .books-page {
+        padding: 0;
+    }
+
     .note-item,
     .note-title,
-    .note-body {
+    .note-body,
+    .book-item,
+    .book-title {
         overflow-wrap: anywhere;
     }
 

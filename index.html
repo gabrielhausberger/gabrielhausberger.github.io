@@ -48,7 +48,9 @@
 
     <script>
         const NOTES_INDEX_URL = 'notes.json';
+        const BOOKS_INDEX_URL = 'books.json';
         let notes = [];
+        let books = [];
 
         const pageContent = {
             home: `
@@ -64,12 +66,6 @@
                 <div class="page-copy">
                     <h2>Projects</h2>
                     <p>Someday?</p>
-                </div>
-            `,
-            reading: `
-                <div class="page-copy">
-                    <h2>Reading</h2>
-                    <p>These are books I am currently reading or have read and, sometimes, my thoughts about them.</p>
                 </div>
             `,
             contact: `
@@ -206,6 +202,21 @@
             }
         }
 
+        async function loadBooks() {
+            try {
+                const response = await fetch(BOOKS_INDEX_URL, { cache: 'no-store' });
+                if (!response.ok) throw new Error('Unable to load books list');
+
+                const entries = await response.json();
+                books = Array.isArray(entries)
+                    ? entries.filter(entry => entry && entry.title && entry.file)
+                    : [];
+            } catch (error) {
+                console.error('Failed to load books:', error);
+                books = [];
+            }
+        }
+
         function renderNotesCatalog() {
             return `
                 <div class="page-copy notes-page">
@@ -215,6 +226,24 @@
                                 <button class="note-item" type="button" data-note-index="${notes.indexOf(note)}">
                                     <span class="note-date">[${note.date}]</span>
                                     <span class="note-title">${note.title}</span>
+                                </button>
+                            </li>
+                        `).join('')}
+                    </ul>
+                </div>
+            `;
+        }
+
+        function renderBooksCatalog() {
+            return `
+                <div class="page-copy books-page">
+                    <h2>Reading</h2>
+                    <p>These are books I am currently reading or have read and, sometimes, my thoughts about them.</p>
+                    <ul class="books-list">
+                        ${books.map((book, index) => `
+                            <li class="books-item-row">
+                                <button class="book-item" type="button" data-book-index="${index}">
+                                    <span class="book-title">${escapeHtml(book.title)}</span>
                                 </button>
                             </li>
                         `).join('')}
@@ -250,15 +279,55 @@
             }
         }
 
-        async function setPage(page, noteFile) {
+        async function renderBookPage(bookIndex) {
+            const book = books[Number(bookIndex)];
+            if (!book) return '<div class="page-copy"><p>Book not found.</p></div>';
+
+            try {
+                const bookUrl = new URL(book.file, document.baseURI);
+                const response = await fetch(bookUrl, { cache: 'no-store' });
+                if (!response.ok) throw new Error('Unable to load book file');
+                const markdown = await response.text();
+                const { title, body } = parseFrontMatter(markdown);
+
+                return `
+                    <div class="page-copy book-page">
+                        <div class="note-header-row">
+                            <button class="book-back" type="button" data-back="reading">←</button>
+                            <h2>${escapeHtml(title || book.title)}</h2>
+                        </div>
+                        <div class="note-body">${parseMarkdownToHtml(body)}</div>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Failed to load book content:', error);
+                return '<div class="page-copy"><p>Unable to load this book.</p></div>';
+            }
+        }
+
+        async function setPage(page, itemIndex) {
             if (page === 'notes') {
                 contentPanel.innerHTML = renderNotesCatalog();
                 document.querySelectorAll('.note-item').forEach(button => {
                     button.addEventListener('click', () => setPage('note', button.dataset.noteIndex));
                 });
+            } else if (page === 'reading') {
+                contentPanel.innerHTML = renderBooksCatalog();
+                document.querySelectorAll('.book-item').forEach(button => {
+                    button.addEventListener('click', () => setPage('book', button.dataset.bookIndex));
+                });
+            } else if (page === 'book') {
+                contentPanel.innerHTML = '<div class="page-copy"><p>Loading…</p></div>';
+                const bookMarkup = await renderBookPage(itemIndex);
+                contentPanel.innerHTML = bookMarkup;
+
+                const backButton = document.querySelector('.book-back');
+                if (backButton) {
+                    backButton.addEventListener('click', () => setPage('reading'));
+                }
             } else if (page === 'note') {
                 contentPanel.innerHTML = '<div class="page-copy"><p>Loading…</p></div>';
-                const noteMarkup = await renderNotePage(noteFile);
+                const noteMarkup = await renderNotePage(itemIndex);
                 contentPanel.innerHTML = noteMarkup;
 
                 const backButton = document.querySelector('.note-back');
@@ -270,7 +339,8 @@
             }
 
             navLinks.forEach(link => {
-                const isActive = link.getAttribute('href') === '#' + (page === 'note' ? 'notes' : page);
+                const activePage = page === 'note' ? 'notes' : page === 'book' ? 'reading' : page;
+                const isActive = link.getAttribute('href') === '#' + activePage;
                 link.classList.toggle('active', isActive);
             });
         }
@@ -284,7 +354,7 @@
         });
 
         async function init() {
-            await loadNotes();
+            await Promise.all([loadNotes(), loadBooks()]);
             setPage('home');
         }
 

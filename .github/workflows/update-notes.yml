@@ -1,4 +1,4 @@
-name: Update notes index
+name: Update content indexes
 
 on:
   push:
@@ -9,7 +9,7 @@ permissions:
   contents: write
 
 jobs:
-  generate-notes:
+  generate-indexes:
     runs-on: ubuntu-latest
 
     steps:
@@ -21,18 +21,20 @@ jobs:
         with:
           node-version: 20
 
-      - name: Generate notes index
-        run: npm run generate-notes
-
-      - name: Commit generated notes index
+      - name: Generate content indexes
         run: |
-          git add notes.json
-          if git diff --cached --quiet -- notes.json; then
-            echo "notes.json is already up to date."
+          npm run generate-notes
+          npm run generate-books
+
+      - name: Commit generated indexes
+        run: |
+          git add notes.json books.json
+          if git diff --cached --quiet -- notes.json books.json; then
+            echo "Content indexes are already up to date."
             exit 0
           fi
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "chore: update generated notes index [skip ci]"
+          git commit -m "chore: update generated content indexes [skip ci]"
           git push
