@@ -291,31 +291,6 @@ p {
 }
 
 
-/* FOOTER */
-
-footer {
-    margin-top: 0;
-    margin-left: 0;
-    align-self: flex-start;
-    padding-left: 0;
-    position: relative;
-    top: 0;
-    margin-bottom: 0;
-}
-
-footer a {
-    margin-right: 22px;
-    display: inline-block;
-    line-height: 1;
-    vertical-align: bottom;
-    color: #777;
-    text-decoration: none;
-}
-
-footer a:hover {
-    color: #222;
-}
-
 @media (max-width: 767px) {
     main {
         width: 100%;
